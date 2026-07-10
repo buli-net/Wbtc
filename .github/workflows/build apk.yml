@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
@@ -21,19 +21,21 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Gradle 8.7 (Gluon compatible)
+      - name: Setup Gradle 8.7
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
 
-      - name: Generate wrapper & Build
+      - name: Build APK
         run: |
           gradle wrapper --gradle-version 8.7
           chmod +x gradlew
+          ./gradlew tasks --all | grep -i gluon
           ./gradlew gluonfxBuild -Ptarget=android --stacktrace
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Wbtc-debug-apk
+          name: Wbtc-apk
           path: build/gluonfx/**/gvm/*.apk
