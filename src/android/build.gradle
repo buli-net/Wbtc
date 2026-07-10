@@ -6,8 +6,8 @@ android {
     compileSdk 36
     buildToolsVersion "36.0.0"
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     defaultConfig {
         applicationId 'com.wbtc.wallet'
@@ -24,10 +24,6 @@ android {
     }
     packaging { jniLibs { useLegacyPackaging = true } }
 }
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
 configurations.all {
     resolutionStrategy {
         force 'androidx.core:core:1.13.1'
@@ -35,9 +31,8 @@ configurations.all {
     }
 }
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
-    options.release = 17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 afterEvaluate {
     tasks.matching { it.name == "preBuild" || it.name == "preDebugBuild" }.configureEach {
