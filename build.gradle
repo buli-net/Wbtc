@@ -2,7 +2,17 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '0.0.13'
 }
+
+gluonfx {
+    target = "android"
+    mainClassName = 'wallettemplate.Main'
+}
+
+
+    
+
 
 dependencies {
   //  implementation project(':bitcoinj-core')
