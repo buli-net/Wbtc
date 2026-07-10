@@ -2,12 +2,12 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.22'
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://nexus.gluonhq.com/nexus/content/repositories/releases' }
+    google()
 }
 
 java {
@@ -17,7 +17,7 @@ java {
 
 javafx {
     version = '21.0.4'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = ['javafx.controls', 'javafx.fxml']
 }
 
 application {
@@ -30,36 +30,18 @@ dependencies {
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'org.slf4j:slf4j-jdk14:2.0.16'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.4"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.4"
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.compilerArgs.addAll(['--release', '17'])
-}
-
-tasks.withType(Javadoc).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-test {
-    useJUnitPlatform()
+    options.compilerArgs.addAll(['--release','17'])
 }
 
 gluonfx {
     target = 'android'
-    graalvmHome = System.getenv("GRAALVM_HOME")
+    mainClassName = 'wallettemplate.Main'
     attachConfig {
         version = '4.0.17'
-        services 'display', 'lifecycle', 'statusbar', 'storage'
+        services = ['display','lifecycle','statusbar','storage']
     }
-    reflectionList = [
-        'org.bitcoinj.wallet.Wallet',
-        'org.bitcoinj.core.Transaction',
-        'org.bitcoinj.params.MainNetParams',
-        'wallettemplate.Main',
-        'wallettemplate.MainController'
-    ]
 }
