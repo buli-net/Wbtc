@@ -1,53 +1,31 @@
 apply plugin: 'com.android.application'
-
 android {
-    namespace 'wallettemplate'
+    namespace 'com.wbtc.wallet'
     compileSdk 34
-
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-
+    compileOptions { sourceCompatibility 1.8; targetCompatibility 1.8 }
     defaultConfig {
-        applicationId 'wallettemplate'
+        applicationId 'com.wbtc.wallet'
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
-
-    repositories {
-        mavenCentral()
-        google()
-        maven { url "https://central.sonatype.com/repository/maven-snapshots/" }
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        mavenLocal()
-    }
-
     dependencies {
         implementation 'androidx.activity:activity:1.8.2'
         implementation 'androidx.core:core:1.12.0'
         api fileTree(dir: '../libs', include: '*.aar')
         api fileTree(dir: '../libs', include: '*.jar')
     }
-
-    signingConfigs {
-        release {
-            if (file("keystore.properties").exists()) {
-                Properties keystoreSettings = new Properties()
-                keystoreSettings.load(new FileInputStream(file("keystore.properties")))
-                storeFile = file(keystoreSettings['storeFile'])
-                storePassword = keystoreSettings['storePassword']
-                keyAlias = keystoreSettings['keyAlias']
-                keyPassword = keystoreSettings['keyPassword']
+}
+afterEvaluate {
+    tasks.matching { it.name.contains("process") && it.name.contains("MainManifest") }.configureEach {
+        doFirst {
+            def mf = file('src/main/AndroidManifest.xml')
+            if (mf.exists()) {
+                def txt = mf.text
+                def stripped = txt.replaceAll(/package="[^"]*"/, '')
+                if (txt != stripped) { mf.text = stripped; println ">>> Stripped package" }
             }
-        }
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
         }
     }
 }
