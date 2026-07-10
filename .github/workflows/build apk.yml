@@ -1,5 +1,8 @@
 name: Build Wbtc APK
-on: { workflow_dispatch: {} }
+
+on:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -7,13 +10,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: gluonhq/setup-graalvm@master
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
-        with: { graalvm: '22.1.0.1-Final', jdk: 'java17' }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          graalvm: '22.1.0.1-Final'
+          jdk: 'java17'
 
       - uses: android-actions/setup-android@v3
 
       - uses: gradle/actions/setup-gradle@v3
-        with: { gradle-version: '8.0' }
+        with:
+          gradle-version: '8.0'
 
       - name: Build APK
         env:
@@ -31,19 +38,13 @@ jobs:
       - name: Show package log
         if: always()
         run: |
-          echo "=== FIND LOGS ==="
           find build -type f -name "*.log" | head -20
-          echo "=== PROCESS PACKAGE LOG ==="
-          cat build/gluonfx/log/*.log 2>/dev/null | tail -n 800 || echo "no log in build/gluonfx/log"
-          echo "=== GVM LOG ==="
-          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null | tail -n 800 || echo "no log in gvm/log"
+          cat build/gluonfx/log/*.log 2>/dev/null | tail -n 800 || true
+          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null | tail -n 800 || true
 
       - name: Find APK
         if: always()
-        run: |
-          find . -type f -name "*.apk" | head -20
-          ls -lh build/gluonfx/aarch64-android/gvm/build/intermediates/apk/debug/*.apk 2>/dev/null || true
-          ls -lh build/gluonfx/aarch64-android/gvm/android_project/app/build/outputs/apk/debug/*.apk 2>/dev/null || true
+        run: find . -type f -name "*.apk" -ls 2>/dev/null || echo "no apk"
 
       - uses: actions/upload-artifact@v4
         if: always()
