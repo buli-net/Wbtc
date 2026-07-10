@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
 }
 
@@ -15,19 +16,24 @@ java {
 }
 
 application {
-    mainClass = 'wallettemplate.Main'
+    mainClassName = 'wallettemplate.Main'
+}
+
+javafx {
+    version = '17.0.10'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
-    implementation 'org.openjfx:javafx-base:17.0.10'
-    implementation 'org.openjfx:javafx-graphics:17.0.10'
-    implementation 'org.openjfx:javafx-controls:17.0.10'
-    implementation 'org.openjfx:javafx-fxml:17.0.10'
     implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'de.jensd:fontawesomefx:8.0.13'
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'org.slf4j:slf4j-jdk14:2.0.16'
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 gluonfx {
