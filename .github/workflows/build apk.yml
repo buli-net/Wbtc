@@ -9,17 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup GraalVM 17
-        uses: graalvm/setup-graalvm@v1
+      - name: Setup GraalVM built by Gluon
+        uses: gluonhq/setup-graalvm@master
         with:
-          java-version: '17'
-          distribution: 'graalvm'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          graalvm: '22.1.0.1-Final'
+          jdk: 'java17'
+          arch: 'x64'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
