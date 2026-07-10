@@ -13,10 +13,13 @@ dependencies {
     implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'de.jensd:fontawesomefx:8.0.13'
     implementation 'com.google.zxing:core:3.5.3'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.83'
+    implementation 'com.google.guava:guava:33.4.0-android'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 }
 
 javafx {
-    version = "21-ea+11.3"
+    version = "17.0.7"
     modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.base' ]
 }
 
@@ -25,5 +28,9 @@ application {
 }
 
 gluonfx {
-    target = 'android'
+    target = "android"
+    attachConfig {
+        version = "4.0.17"
+        services = ["display", "lifecycle", "statusbar", "storage", "util"]
+    }
 }
