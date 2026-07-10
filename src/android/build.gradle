@@ -19,34 +19,14 @@ android {
     }
     packaging { jniLibs { useLegacyPackaging = true } }
 }
-
-// --- fix 2 lỗi của Gluon ---
 afterEvaluate {
-    // 1. Xóa package="" trong manifest
-    tasks.configureEach { t ->
-        if (t.name.toLowerCase().contains("manifest")) {
-            t.doFirst {
-                fileTree(dir: '.', include: '**/AndroidManifest.xml').each { mf ->
-                    if (mf.text.contains('package=')) {
-                        mf.text = mf.text.replaceAll(/package="[^"]*"/, '')
-                        println ">>> Stripped package in $mf"
-                    }
-                }
-            }
-        }
-    }
-    // 2. Patch MainActivity enableEdgeToEdge -> API tương thích
     tasks.matching { it.name == "preBuild" || it.name == "preDebugBuild" }.configureEach {
         doFirst {
             def f = file('src/main/java/com/gluonhq/helloandroid/MainActivity.java')
-            if (f.exists()) {
-                def src = f.text
-                if (src.contains('enableEdgeToEdge')) {
-                    src = src.replace('WindowCompat.enableEdgeToEdge(getWindow());',
-                                      'WindowCompat.setDecorFitsSystemWindows(getWindow(), false);')
-                    f.text = src
-                    println ">>> Patched MainActivity enableEdgeToEdge"
-                }
+            if (f.exists() && f.text.contains('enableEdgeToEdge')) {
+                f.text = f.text.replace('WindowCompat.enableEdgeToEdge(getWindow());',
+                                        'WindowCompat.setDecorFitsSystemWindows(getWindow(), false);')
+                println ">>> Patched MainActivity"
             }
         }
     }
