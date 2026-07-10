@@ -1,53 +1,42 @@
-name: Build Wbtc APK
-
-on:
-  workflow_dispatch:
+name: Android Gluon Build
+on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: gluonhq/setup-graalvm@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup GraalVM 22.1
+        uses: graalvm/setup-graalvm@v1
         with:
-          graalvm: '22.1.0.1-Final'
-          jdk: 'java17'
+          version: '22.1.0'
+          java-version: '17'
+          distribution: 'gluon'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup Gradle 8.13
+        uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.0'
+          gradle-version: 8.13
 
-      - name: Build APK
-        env:
-          JAVA_TOOL_OPTIONS: "-XX:-UseContainerSupport"
-          ANDROID_SDK_ROOT: ""
-          ANDROID_HOME: ""
-          ANDROID_SDK_HOME: ""
+      - name: Build Android APK
         run: |
-          rm -rf ~/.gradle/daemon || true
-          gradle wrapper --gradle-version 8.0
           chmod +x gradlew
-          ./gradlew nativeBuild -Ptarget=android --no-daemon --stacktrace
-          ./gradlew nativePackage -Ptarget=android --no-daemon --info --stacktrace
+         ./gradlew clean gluonfxBuild gluonfxPackage -Ptarget=android --no-daemon --stacktrace
 
-      - name: Show package log
+      - name: Show APK
         if: always()
         run: |
-          find build -type f -name "*.log" | head -20
-          cat build/gluonfx/log/*.log 2>/dev/null | tail -n 800 || true
-          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null | tail -n 800 || true
+          find build -type f -name "*.apk" | head -20
+          ls -lh build/gluonfx/aarch64-android/gvm/android_project/app/build/outputs/apk/debug/ || true
+          ls -lh build/gluonfx/aarch64-android/ || true
 
-      - name: Find APK
-        if: always()
-        run: find . -type f -name "*.apk" -ls 2>/dev/null || echo "no apk"
-
-      - uses: actions/upload-artifact@v4
-        if: always()
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: Wbtc-apk
-          path: "**/*.apk"
+          name: wbtc-apk
+          path: build/gluonfx/aarch64-android/gvm/android_project/app/build/outputs/apk/debug/app-debug.apk
