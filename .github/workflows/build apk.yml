@@ -2,40 +2,27 @@ name: Build Wbtc APK
 on:
   push: { branches: [ main ] }
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup GraalVM 17
-        uses: graalvm/setup-graalvm@v1
+      - uses: graalvm/setup-graalvm@v1
         with:
           java-version: '17'
           distribution: 'graalvm'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Setup Gradle 8.7
-        uses: gradle/actions/setup-gradle@v3
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
-
-      - name: Build APK
-        run: |
+      - run: |
           gradle wrapper --gradle-version 8.7
           chmod +x gradlew
-          ./gradlew tasks --all | grep -i gluon
           ./gradlew gluonfxBuild -Ptarget=android --stacktrace
-
-      - name: Upload APK
-        if: always()
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Wbtc-apk
           path: build/gluonfx/**/gvm/*.apk
