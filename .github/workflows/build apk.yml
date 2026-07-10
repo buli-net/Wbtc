@@ -31,6 +31,9 @@ jobs:
 
       - name: Build APK
         run: |
+          echo "=== build.gradle dang dung ==="
+          cat build.gradle
+          echo "=============================="
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
           ./gradlew gluonfxBuild -Ptarget=android --stacktrace
