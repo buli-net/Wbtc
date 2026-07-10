@@ -1,29 +1,39 @@
-name: Unzip src
+name: Auto Unzip Wbtc
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   unzip:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Unzip wallettemplate.zip
         run: |
-          cd 
-          unzip -o wallettemplate.zip -d wallettemplate
-          rm wallettemplate.zip
+          ls -la
+          if [ -f "wallettemplate.zip" ]; then
+            unzip -o wallettemplate.zip -d.
+            rm wallettemplate.zip
+            echo "Unzipped wallettemplate.zip"
+          fi
+          # bung tất cả zip khác nếu có
+          for z in *.zip; do
+            [ -e "$z" ] || continue
+            unzip -o "$z" -d.
+            rm "$z"
+          done
+          ls -la
 
-      - name: Commit
+      - name: Commit extracted files
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Unzip wallettemplate.zip" || echo "No changes"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "Auto unzip wallettemplate.zip"
           git push
