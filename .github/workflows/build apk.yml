@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -31,16 +31,18 @@ jobs:
 
       - name: Build APK
         run: |
-          echo "=== build.gradle dang dung ==="
           cat build.gradle
-          echo "=============================="
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
-          ./gradlew gluonfxBuild -Ptarget=android --stacktrace
+          ./gradlew nativeBuild -Ptarget=android --stacktrace
+          ./gradlew nativePackage -Ptarget=android --stacktrace
 
       - name: Upload APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Wbtc-apk
-          path: build/gluonfx/**/gvm/*.apk
+          path: |
+            build/gluonfx/**/gvm/*.apk
+            build/client/**/gvm/*.apk
+            build/**/*.apk
