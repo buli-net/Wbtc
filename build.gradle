@@ -1,42 +1,43 @@
-plugins {
-    id 'java'
-    id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.28'
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.wbtc.wallet'
+    compileSdk 34
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    defaultConfig {
+        applicationId 'com.wbtc.wallet'
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    dependencies {
+        implementation 'androidx.activity:activity:1.8.2'
+        implementation 'androidx.core:core:1.12.0'
+        api fileTree(dir: '../libs', include: '*.aar')
+        api fileTree(dir: '../libs', include: '*.jar')
+    }
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-application {
-    mainClass = 'wallettemplate.Main'
-}
-
-javafx {
-    version = '17.0.10'
-    modules = ['javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml']
-}
-
-dependencies {
-    implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
-    implementation 'de.jensd:fontawesomefx:8.0.13'
-    implementation 'com.google.zxing:core:3.5.3'
-    implementation 'org.slf4j:slf4j-jdk14:2.0.16'
-    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-}
-
-gluonfx {
-    mainClassName = 'wallettemplate.Main'
-    target = 'android'
-    attachConfig {
-        version = '4.0.17'
-        services 'display', 'lifecycle', 'statusbar', 'storage'
+// --- HACK: xóa package="" do Gluon tự inject trước khi AGP merge ---
+afterEvaluate {
+    tasks.matching { it.name.contains("process") && it.name.contains("MainManifest") }.configureEach {
+        doFirst {
+            def mf = file('src/main/AndroidManifest.xml')
+            if (mf.exists()) {
+                def txt = mf.text
+                def stripped = txt.replaceAll(/package="[^"]*"/, '')
+                if (txt != stripped) {
+                    mf.text = stripped
+                    println ">>> Stripped package attribute from AndroidManifest.xml"
+                }
+            }
+        }
     }
 }
