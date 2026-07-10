@@ -10,15 +10,9 @@ repositories {
     maven { url 'https://nexus.gluonhq.com/nexus/content/repositories/releases' }
 }
 
-dependencies {
-    implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
-    implementation 'de.jensd:fontawesomefx:8.0.13'
-    implementation 'com.google.zxing:core:3.5.3'
-    implementation 'org.slf4j:slf4j-jdk14:2.0.16'
-    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.4"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.4"
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 javafx {
@@ -30,32 +24,42 @@ application {
     mainClass = 'wallettemplate.Main'
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
+dependencies {
+    implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
+    implementation 'de.jensd:fontawesomefx:8.0.13'
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'org.slf4j:slf4j-jdk14:2.0.16'
+    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
 
-compileJava.options.encoding = 'UTF-8'
-compileTestJava.options.encoding = 'UTF-8'
-javadoc.options.encoding = 'UTF-8'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.4"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.4"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.addAll(['--release', '17'])
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform()
+}
 
 gluonfx {
     target = 'android'
-    mainClassName = 'wallettemplate.Main'
     graalvmHome = System.getenv("GRAALVM_HOME")
     attachConfig {
         version = '4.0.17'
         services 'display', 'lifecycle', 'statusbar', 'storage'
     }
-    // bitcoinj dùng reflection nhiều, thêm vào để native-image không strip
     reflectionList = [
         'org.bitcoinj.wallet.Wallet',
         'org.bitcoinj.core.Transaction',
-        'org.bitcoinj.core.NetworkParameters',
         'org.bitcoinj.params.MainNetParams',
         'wallettemplate.Main',
         'wallettemplate.MainController'
     ]
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '17'])
 }
