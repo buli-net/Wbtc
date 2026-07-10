@@ -32,6 +32,6 @@ gluonfx {
     target = "android"
     attachConfig {
         version = "4.0.17"
-        services "display", "lifecycle", "statusbar", "storage", "util"
+        services "display", "lifecycle", "statusbar", "storage"
     }
 }
