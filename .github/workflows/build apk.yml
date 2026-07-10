@@ -24,6 +24,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Android 36
+        run: |
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "extras;google;m2repository" "extras;android;m2repository" || true
+          yes | sdkmanager --licenses || true
+
       - name: Setup Gradle 8.0
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -33,11 +38,20 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: "-XX:-UseContainerSupport"
         run: |
-          cat build.gradle
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
           ./gradlew nativeBuild -Ptarget=android --stacktrace
-          ./gradlew nativePackage -Ptarget=android --stacktrace
+          ./gradlew nativePackage -Ptarget=android --info
+
+      - name: Show package logs on failure
+        if: failure()
+        run: |
+          find build -type f -name "*.log" | xargs ls -lh || true
+          echo "=== process-package log ==="
+          cat build/gluonfx/log/*package* || true
+          cat build/gluonfx/aarch64-android/gvm/log/* || true
+          echo "=== gensrc build.gradle ==="
+          cat build/gluonfx/aarch64-android/gensrc/android/build.gradle || true
 
       - name: Upload APK
         if: always()
@@ -46,5 +60,4 @@ jobs:
           name: Wbtc-apk
           path: |
             build/gluonfx/**/gvm/*.apk
-            build/client/**/gvm/*.apk
             build/**/*.apk
