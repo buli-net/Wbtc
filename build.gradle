@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
 }
 
@@ -15,13 +15,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-javafx {
-    version = '21.0.4'
-    modules = ['javafx.controls', 'javafx.fxml']
+application {
+    mainClassName = 'wallettemplate.Main'
+    mainClass = 'wallettemplate.Main'
 }
 
-application {
-    mainClass = 'wallettemplate.Main'
+javafx {
+    version = '17.0.10'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
@@ -34,14 +35,12 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.compilerArgs.addAll(['--release','17'])
 }
 
 gluonfx {
     target = 'android'
-    mainClassName = 'wallettemplate.Main'
     attachConfig {
         version = '4.0.17'
-        services = ['display','lifecycle','statusbar','storage']
+        services = 'display,lifecycle,statusbar,storage'
     }
 }
