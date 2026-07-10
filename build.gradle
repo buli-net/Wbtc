@@ -33,6 +33,7 @@ dependencies {
 }
 
 gluonfx {
+    mainClassName = 'wallettemplate.Main'
     target = 'android'
     attachConfig {
         version = '4.0.17'
