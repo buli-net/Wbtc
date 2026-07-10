@@ -1,8 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.22'
 }
 
 repositories {
@@ -16,15 +15,16 @@ java {
 }
 
 application {
-    mainClassName = 'wallettemplate.Main'
-}
-
-javafx {
-    version = '17.0.10'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    mainClass = 'wallettemplate.Main'
 }
 
 dependencies {
+    // JavaFX thay cho javafxplugin
+    implementation 'org.openjfx:javafx-base:21.0.4'
+    implementation 'org.openjfx:javafx-graphics:21.0.4'
+    implementation 'org.openjfx:javafx-controls:21.0.4'
+    implementation 'org.openjfx:javafx-fxml:21.0.4'
+
     implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'de.jensd:fontawesomefx:8.0.13'
     implementation 'com.google.zxing:core:3.5.3'
@@ -39,7 +39,6 @@ tasks.withType(JavaCompile).configureEach {
 gluonfx {
     target = 'android'
     attachConfig {
-        version = '4.0.17'
         services 'display', 'lifecycle', 'statusbar', 'storage'
     }
 }
