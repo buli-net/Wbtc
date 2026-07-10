@@ -1,40 +1,43 @@
-plugins {
-    id 'java'
-    id 'application'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
-}
+name: Build Wbtc APK
 
-repositories {
-    mavenCentral()
-    google()
-}
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
 
-application {
-    mainClass = 'wallettemplate.Main'
-}
+      - name: Setup GraalVM 17
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-dependencies {
-    implementation 'org.openjfx:javafx-base:17.0.10'
-    implementation 'org.openjfx:javafx-graphics:17.0.10'
-    implementation 'org.openjfx:javafx-controls:17.0.10'
-    implementation 'org.openjfx:javafx-fxml:17.0.10'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-    implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
-    implementation 'de.jensd:fontawesomefx:8.0.13'
-    implementation 'com.google.zxing:core:3.5.3'
-    implementation 'org.slf4j:slf4j-jdk14:2.0.16'
-    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-}
+      - name: Setup Gradle 8.0
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.0'
 
-gluonfx {
-    target = 'android'
-    attachConfig {
-        version = '4.0.17'
-        services 'display', 'lifecycle', 'statusbar', 'storage'
-    }
-}
+      - name: Build APK
+        run: |
+          gradle wrapper --gradle-version 8.0
+          chmod +x gradlew
+          ./gradlew gluonfxBuild -Ptarget=android --stacktrace
+
+      - name: Upload APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wbtc-apk
+          path: build/gluonfx/**/gvm/*.apk
