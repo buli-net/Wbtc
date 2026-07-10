@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +30,8 @@ jobs:
           gradle-version: '8.0'
 
       - name: Build APK
+        env:
+          JAVA_TOOL_OPTIONS: "-XX:-UseContainerSupport"
         run: |
           cat build.gradle
           gradle wrapper --gradle-version 8.0
