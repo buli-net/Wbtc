@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.22'
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.18'
 }
 
 repositories {
@@ -19,12 +19,10 @@ application {
 }
 
 dependencies {
-    // JavaFX thay cho javafxplugin
-    implementation 'org.openjfx:javafx-base:21.0.4'
-    implementation 'org.openjfx:javafx-graphics:21.0.4'
-    implementation 'org.openjfx:javafx-controls:21.0.4'
-    implementation 'org.openjfx:javafx-fxml:21.0.4'
-
+    implementation 'org.openjfx:javafx-base:17.0.10'
+    implementation 'org.openjfx:javafx-graphics:17.0.10'
+    implementation 'org.openjfx:javafx-controls:17.0.10'
+    implementation 'org.openjfx:javafx-fxml:17.0.10'
     implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'de.jensd:fontawesomefx:8.0.13'
     implementation 'com.google.zxing:core:3.5.3'
@@ -39,6 +37,7 @@ tasks.withType(JavaCompile).configureEach {
 gluonfx {
     target = 'android'
     attachConfig {
+        version = '4.0.17'
         services 'display', 'lifecycle', 'statusbar', 'storage'
     }
 }
