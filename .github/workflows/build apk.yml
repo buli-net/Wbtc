@@ -2,9 +2,6 @@ name: Build Wbtc APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   build:
@@ -32,26 +29,22 @@ jobs:
       - name: Build APK
         env:
           JAVA_TOOL_OPTIONS: "-XX:-UseContainerSupport"
+          ANDROID_SDK_ROOT: ""
+          ANDROID_HOME: ""
+          ANDROID_SDK_HOME: ""
         run: |
-          # Fix AGP 8.13 error: ANDROID_HOME vs ANDROID_SDK_ROOT conflict
-          unset ANDROID_SDK_ROOT
-          unset ANDROID_HOME
-          echo "ANDROID vars cleaned, Gluon will use ~/.gluon/substrate/Android"
-
+          ./gradlew --stop || true
+          rm -rf ~/.gradle/daemon || true
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
-          ./gradlew nativeBuild -Ptarget=android --stacktrace
-          ./gradlew nativePackage -Ptarget=android --info --stacktrace
+          ./gradlew nativeBuild -Ptarget=android --no-daemon --stacktrace
+          ./gradlew nativePackage -Ptarget=android --no-daemon --info --stacktrace
 
       - name: DUMP LOGS
         if: always()
         run: |
-          echo "=== package task log ==="
-          cat build/gluonfx/log/*package* 2>/dev/null | tail -n 300 || true
-          echo "=== gvm inner gradle log ==="
-          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null | tail -n 200 || true
-          echo "=== apk output ==="
-          find build -name "*.apk" -ls 2>/dev/null || echo "no apk yet"
+          cat build/gluonfx/log/*package* 2>/dev/null | tail -n 400 || true
+          find build -name "*.apk" -ls 2>/dev/null || echo "no apk"
 
       - name: Upload APK
         if: always()
@@ -61,4 +54,3 @@ jobs:
           path: |
             build/gluonfx/**/gvm/**/*.apk
             build/gluonfx/**/gvm/android_project/app/build/outputs/apk/**/*.apk
-            build/**/*.apk
