@@ -16,6 +16,7 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15to18:1.83'
     implementation 'com.google.guava:guava:33.4.0-android'
     implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
 
 javafx {
@@ -31,6 +32,6 @@ gluonfx {
     target = "android"
     attachConfig {
         version = "4.0.17"
-        services = ["display", "lifecycle", "statusbar", "storage", "util"]
+        services "display", "lifecycle", "statusbar", "storage", "util"
     }
 }
