@@ -24,11 +24,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android 36
-        run: |
-          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "ndk;25.1.8937393" || true
-          yes | sdkmanager --licenses || true
-
       - name: Setup Gradle 8.0
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -38,29 +33,32 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: "-XX:-UseContainerSupport"
         run: |
+          # Fix AGP 8.13 error: ANDROID_HOME vs ANDROID_SDK_ROOT conflict
+          unset ANDROID_SDK_ROOT
+          unset ANDROID_HOME
+          echo "ANDROID vars cleaned, Gluon will use ~/.gluon/substrate/Android"
+
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
           ./gradlew nativeBuild -Ptarget=android --stacktrace
-          ./gradlew nativePackage -Ptarget=android --info
+          ./gradlew nativePackage -Ptarget=android --info --stacktrace
 
-      - name: DUMP PACKAGE LOGS
+      - name: DUMP LOGS
         if: always()
         run: |
-          echo "=== FIND LOGS ==="
-          find build -type f | grep -i log | head -30
-          echo "=== process-package-task.log ==="
-          cat build/gluonfx/log/*package* 2>/dev/null || echo "not found in log/"
-          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null || true
-          echo "=== gensrc android build.gradle ==="
-          cat build/gluonfx/aarch64-android/gensrc/android/build.gradle 2>/dev/null || true
-          echo "=== gensrc android gradle wrapper ==="
-          cat build/gluonfx/aarch64-android/gensrc/android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || true
+          echo "=== package task log ==="
+          cat build/gluonfx/log/*package* 2>/dev/null | tail -n 300 || true
+          echo "=== gvm inner gradle log ==="
+          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null | tail -n 200 || true
+          echo "=== apk output ==="
+          find build -name "*.apk" -ls 2>/dev/null || echo "no apk yet"
 
-      - name: Upload APK if exists
+      - name: Upload APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Wbtc-apk
           path: |
-            build/gluonfx/**/gvm/*.apk
+            build/gluonfx/**/gvm/**/*.apk
+            build/gluonfx/**/gvm/android_project/app/build/outputs/apk/**/*.apk
             build/**/*.apk
