@@ -15,10 +15,11 @@ jobs:
 
       - name: Setup GraalVM built by Gluon
         uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           graalvm: '22.1.0.1-Final'
           jdk: 'java17'
-          arch: 'x64'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
