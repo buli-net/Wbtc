@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 android {
     namespace 'com.wbtc.wallet'
     compileSdk 36
-    compileOptions { sourceCompatibility 1.8; targetCompatibility 1.8 }
+    buildToolsVersion "36.0.0"
+    compileOptions { sourceCompatibility 1_8; targetCompatibility 1_8 }
     defaultConfig {
         applicationId 'com.wbtc.wallet'
         minSdkVersion 21
@@ -11,20 +12,41 @@ android {
         versionName "1.0"
     }
     dependencies {
-        implementation 'androidx.activity:activity:1.8.2'
-        implementation 'androidx.core:core:1.12.0'
+        implementation 'androidx.activity:activity:1.9.2'
+        implementation 'androidx.core:core:1.13.1'
         api fileTree(dir: '../libs', include: '*.aar')
         api fileTree(dir: '../libs', include: '*.jar')
     }
+    packaging { jniLibs { useLegacyPackaging = true } }
 }
+
+// --- fix 2 lỗi của Gluon ---
 afterEvaluate {
-    tasks.matching { it.name.contains("process") && it.name.contains("MainManifest") }.configureEach {
+    // 1. Xóa package="" trong manifest
+    tasks.configureEach { t ->
+        if (t.name.toLowerCase().contains("manifest")) {
+            t.doFirst {
+                fileTree(dir: '.', include: '**/AndroidManifest.xml').each { mf ->
+                    if (mf.text.contains('package=')) {
+                        mf.text = mf.text.replaceAll(/package="[^"]*"/, '')
+                        println ">>> Stripped package in $mf"
+                    }
+                }
+            }
+        }
+    }
+    // 2. Patch MainActivity enableEdgeToEdge -> API tương thích
+    tasks.matching { it.name == "preBuild" || it.name == "preDebugBuild" }.configureEach {
         doFirst {
-            def mf = file('src/main/AndroidManifest.xml')
-            if (mf.exists()) {
-                def txt = mf.text
-                def stripped = txt.replaceAll(/package="[^"]*"/, '')
-                if (txt != stripped) { mf.text = stripped; println ">>> Stripped package" }
+            def f = file('src/main/java/com/gluonhq/helloandroid/MainActivity.java')
+            if (f.exists()) {
+                def src = f.text
+                if (src.contains('enableEdgeToEdge')) {
+                    src = src.replace('WindowCompat.enableEdgeToEdge(getWindow());',
+                                      'WindowCompat.setDecorFitsSystemWindows(getWindow(), false);')
+                    f.text = src
+                    println ">>> Patched MainActivity enableEdgeToEdge"
+                }
             }
         }
     }
