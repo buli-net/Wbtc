@@ -9,6 +9,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    signingConfigs {
+        debug {
+            storeFile file('.android/debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.debug }
+        release { signingConfig signingConfigs.debug }
+    }
     defaultConfig {
         applicationId 'com.wbtc.wallet'
         minSdkVersion 21
@@ -40,10 +52,31 @@ tasks.withType(JavaCompile).configureEach {
 afterEvaluate {
     tasks.matching { it.name == "preBuild" || it.name == "preDebugBuild" }.configureEach {
         doFirst {
+            // 1. patch MainActivity
             fileTree(dir: 'src', include: '**/MainActivity.java').each { f ->
                 if (f.text.contains('enableEdgeToEdge')) {
                     f.text = f.text.replace('WindowCompat.enableEdgeToEdge(getWindow());',
                                             'WindowCompat.setDecorFitsSystemWindows(getWindow(), false);')
+                    println ">>> Patched $f"
+                }
+            }
+            // 2. create debug.keystore where AGP expects it
+            def ksFile = new File(projectDir, '.android/debug.keystore')
+            if (!ksFile.exists()) {
+                ksFile.parentFile.mkdirs()
+                def homeKs = new File(System.getProperty('user.home'), '.android/debug.keystore')
+                if (homeKs.exists()) {
+                    ksFile.bytes = homeKs.bytes
+                    println ">>> Copied debug.keystore from ${homeKs}"
+                } else {
+                    println ">>> Generating debug.keystore at ${ksFile}"
+                    exec {
+                        commandLine 'keytool','-genkey','-v',
+                            '-keystore', ksFile.absolutePath,
+                            '-alias','androiddebugkey','-keyalg','RSA','-keysize','2048','-validity','10000',
+                            '-storepass','android','-keypass','android',
+                            '-dname','CN=Android Debug,O=Android,C=US'
+                    }
                 }
             }
         }
