@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Android 36
         run: |
-          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "extras;google;m2repository" "extras;android;m2repository" || true
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "ndk;25.1.8937393" || true
           yes | sdkmanager --licenses || true
 
       - name: Setup Gradle 8.0
@@ -43,17 +43,20 @@ jobs:
           ./gradlew nativeBuild -Ptarget=android --stacktrace
           ./gradlew nativePackage -Ptarget=android --info
 
-      - name: Show package logs on failure
-        if: failure()
+      - name: DUMP PACKAGE LOGS
+        if: always()
         run: |
-          find build -type f -name "*.log" | xargs ls -lh || true
-          echo "=== process-package log ==="
-          cat build/gluonfx/log/*package* || true
-          cat build/gluonfx/aarch64-android/gvm/log/* || true
-          echo "=== gensrc build.gradle ==="
-          cat build/gluonfx/aarch64-android/gensrc/android/build.gradle || true
+          echo "=== FIND LOGS ==="
+          find build -type f | grep -i log | head -30
+          echo "=== process-package-task.log ==="
+          cat build/gluonfx/log/*package* 2>/dev/null || echo "not found in log/"
+          cat build/gluonfx/aarch64-android/gvm/log/*.log 2>/dev/null || true
+          echo "=== gensrc android build.gradle ==="
+          cat build/gluonfx/aarch64-android/gensrc/android/build.gradle 2>/dev/null || true
+          echo "=== gensrc android gradle wrapper ==="
+          cat build/gluonfx/aarch64-android/gensrc/android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || true
 
-      - name: Upload APK
+      - name: Upload APK if exists
         if: always()
         uses: actions/upload-artifact@v4
         with:
