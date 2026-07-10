@@ -30,10 +30,6 @@ dependencies {
     implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
 gluonfx {
     target = 'android'
     attachConfig {
