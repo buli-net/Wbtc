@@ -2,20 +2,15 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'com.gluonhq.gluonfx-gradle-plugin' version '0.0.13'
+    id 'com.gluonhq.gluonfx-gradle-plugin' version '1.0.22'
 }
 
-gluonfx {
-    target = "android"
-    mainClassName = 'wallettemplate.Main'
+repositories {
+    mavenCentral()
+    maven { url 'https://nexus.gluonhq.com/nexus/content/repositories/releases' }
 }
-
-
-    
-
 
 dependencies {
-  //  implementation project(':bitcoinj-core')
     implementation 'org.bitcoinj:bitcoinj-core:0.17.1'
     implementation 'de.jensd:fontawesomefx:8.0.13'
     implementation 'com.google.zxing:core:3.5.3'
@@ -31,18 +26,36 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
+application {
+    mainClass = 'wallettemplate.Main'
+}
+
 sourceCompatibility = 17
+targetCompatibility = 17
+
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 javadoc.options.encoding = 'UTF-8'
 
-compileJava {
-    options.compilerArgs.addAll(['--release', '17'])
-    options.compilerArgs << '-Xlint:deprecation'
+gluonfx {
+    target = 'android'
+    mainClassName = 'wallettemplate.Main'
+    graalvmHome = System.getenv("GRAALVM_HOME")
+    attachConfig {
+        version = '4.0.17'
+        services 'display', 'lifecycle', 'statusbar', 'storage'
+    }
+    // bitcoinj dùng reflection nhiều, thêm vào để native-image không strip
+    reflectionList = [
+        'org.bitcoinj.wallet.Wallet',
+        'org.bitcoinj.core.Transaction',
+        'org.bitcoinj.core.NetworkParameters',
+        'org.bitcoinj.params.MainNetParams',
+        'wallettemplate.Main',
+        'wallettemplate.MainController'
+    ]
 }
 
-mainClassName = 'wallettemplate.Main'
-
-test {
-    useJUnitPlatform()
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(['--release', '17'])
 }
