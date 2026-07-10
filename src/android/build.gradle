@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 android {
     namespace 'com.wbtc.wallet'
-    compileSdk 34
+    compileSdk 36
     compileOptions { sourceCompatibility 1.8; targetCompatibility 1.8 }
     defaultConfig {
         applicationId 'com.wbtc.wallet'
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
     }
