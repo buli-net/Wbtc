@@ -22,7 +22,7 @@ dependencies {
     implementation "de.jensd:fontawesomefx:8.0.13"
     implementation "com.google.zxing:core:3.5.3"
     implementation "org.bouncycastle:bcprov-jdk15to18:1.83"
-    implementation "com.google.guava:guava:33.4.0-jre"
+    implementation "com.google.guava:guava:32.1.2-android"
     implementation "org.slf4j:slf4j-api:2.0.16"
     implementation "jakarta.annotation:jakarta.annotation-api:2.1.1"
     implementation "com.google.protobuf:protobuf-javalite:4.33.4"
@@ -38,7 +38,7 @@ application {
     mainClass = "wallettemplate.WalletTemplate"
 }
 
-tasks.withType(JavaCompile).configureEach {
+tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 
@@ -46,27 +46,23 @@ gluonfx {
     target = "android"
     graalvmHome = System.getenv("GRAALVM_HOME")
     mainClassName = "wallettemplate.WalletTemplate"
-    targetSdkVersion = "34"
-    // quan trọng để hết đen
+    manifest = "src/android/AndroidManifest.xml"
+
     reflectionList = [
         "wallettemplate.WalletTemplate",
-        "wallettemplate.Main",
         "wallettemplate.MainController",
         "wallettemplate.SendMoneyController",
         "wallettemplate.WalletSetPasswordController",
         "wallettemplate.WalletPasswordController",
         "wallettemplate.WalletSettingsController",
-        "org.bitcoinj.walletfx.utils.GuiUtils",
-        "org.bitcoinj.walletfx.controls.ClickableBitcoinAddress",
-        "org.bitcoinj.walletfx.overlay.OverlayableStackPaneController"
+        "org.bitcoinj.walletfx.utils.GuiUtils"
     ]
     resourcesList = [
         ".*\\.fxml",
         ".*\\.css",
         ".*\\.png",
-        "org/bitcoinj/walletfx/.*",
-        "wallettemplate/.*"
+        "wallettemplate/.*",
+        "org/bitcoinj/walletfx/.*"
     ]
     runtimeArgs = ["-Djavafx.verbose=true"]
-    manifest = "src/android/AndroidManifest.xml"
 }
