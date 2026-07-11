@@ -5,12 +5,10 @@ android {
     namespace 'com.wbtc.wallet'
     compileSdk 34
     buildToolsVersion "34.0.0"
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-
     signingConfigs {
         debug {
             storeFile file('.android/debug.keystore')
@@ -21,9 +19,54 @@ android {
     }
     buildTypes {
         debug { signingConfig signingConfigs.debug }
-        release { signingConfig signingConfigs.debug }
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+        }
     }
-
     defaultConfig {
         applicationId 'com.wbtc.wallet'
-       
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+    }
+    dependencies {
+        implementation 'androidx.activity:activity:1.9.2'
+        implementation 'androidx.core:core:1.13.1'
+        api fileTree(dir: '../libs', include: '*.aar')
+        api fileTree(dir: '../libs', include: '*.jar')
+    }
+    packaging { jniLibs { useLegacyPackaging = true } }
+}
+configurations.all {
+    resolutionStrategy { force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22' }
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+afterEvaluate {
+    tasks.matching { it.name == "preBuild" }.configureEach {
+        doFirst {
+            fileTree(dir: 'src', include: '**/MainActivity.java').each { f ->
+                if (f.text.contains('enableEdgeToEdge')) {
+                    f.text = f.text.replace('WindowCompat.enableEdgeToEdge(getWindow());','WindowCompat.setDecorFitsSystemWindows(getWindow(), false);')
+                }
+            }
+            def ks = new File(projectDir, '.android/debug.keystore')
+            if (!ks.exists()) {
+                ks.parentFile.mkdirs()
+                def homeKs = new File(System.getProperty('user.home'), '.android/debug.keystore')
+                if (homeKs.exists()) { ks.bytes = homeKs.bytes }
+                else {
+                    exec {
+                        commandLine 'keytool','-genkey','-v','-keystore',ks.absolutePath,'-alias','androiddebugkey','-keyalg','RSA','-keysize','2048','-validity','10000','-storepass','android','-keypass','android','-dname','CN=Android Debug,O=Android,C=US'
+                    }
+                }
+            }
+        }
+    }
+}
