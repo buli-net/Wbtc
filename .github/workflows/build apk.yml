@@ -10,12 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup GraalVM 22.1
+      - name: Setup GraalVM for JDK 17
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '22.1.0'
           java-version: '17'
-          distribution: 'graalvm-community'
+          distribution: 'graalvm'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -29,8 +28,8 @@ jobs:
 
       - name: Build Android APK
         run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          echo "GRAALVM_HOME=$GRAALVM_HOME"
+          java -version
+          native-image --version
           chmod +x gradlew
           ./gradlew clean gluonfxBuild gluonfxPackage -Ptarget=android --no-daemon --stacktrace
 
