@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup GraalVM for JDK 17
+      - name: Setup GraalVM 17.0.12
         uses: graalvm/setup-graalvm@v1
         with:
           java-version: '17'
@@ -21,16 +21,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Gradle 8.13
+      - name: Setup Gradle 7.6.4
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.13
+          gradle-version: 7.6.4
 
-      - name: Build Android APK
-        run: |
-          java -version
-          native-image --version
-          gradle clean gluonfxBuild gluonfxPackage -Ptarget=android --no-daemon --stacktrace
+      - name: Build APK
+        run: gradle clean gluonfxBuild gluonfxPackage -Ptarget=android --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
