@@ -13,7 +13,10 @@ jobs:
       - name: Setup Gluon GraalVM 22.1
         uses: gluonhq/setup-graalvm@master
         with:
-          graalvm-version: '22.1.0.1-Final'
+          graalvm: '22.1.0.1-Final'
+          jdk: '17'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -26,13 +29,8 @@ jobs:
       - name: Build Android APK
         run: |
           echo "GRAALVM_HOME=$GRAALVM_HOME"
-          echo "JAVA_HOME=$JAVA_HOME"
           chmod +x gradlew
           ./gradlew clean gluonfxBuild gluonfxPackage -Ptarget=android --no-daemon --stacktrace
-
-      - name: Show APK
-        if: always()
-        run: find build -type f -name "*.apk" | head -20
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
